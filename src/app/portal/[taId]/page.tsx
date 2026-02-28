@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { BaseGlassCard } from '@/components/ui/BaseGlassCard';
 import { useTheme } from '@/hooks/useTheme';
+import { useSelection } from '@/hooks/useSelection';
 import { ManualCalendar } from '@/components/modules/ManualCalendar';
 import { BellRing, ExternalLink, MessageSquare, Calendar as CalendarIcon, FileQuestion, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -11,6 +12,7 @@ import Link from 'next/link';
 
 export default function PortalDashboard() {
     const { themeColor, isActive, setIsActive } = useTheme();
+    const { courseName, isLoaded } = useSelection();
 
     const FAQS = [
         {
@@ -54,7 +56,9 @@ export default function PortalDashboard() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <h2 className="text-sm md:text-md font-bold tracking-tight text-white hidden sm:block mr-4">CS101: Intro to Computer Science</h2>
+                    {isLoaded && courseName && (
+                        <h2 className="text-sm md:text-md font-bold tracking-tight text-white hidden sm:block mr-4">{courseName}</h2>
+                    )}
                     <button
                         onClick={() => setIsActive(!isActive)}
                         className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium transition-colors border ${isActive ? 'bg-white/10 border-white/20 text-white' : 'bg-transparent border-white/5 text-gray-500 hover:text-white'}`}
