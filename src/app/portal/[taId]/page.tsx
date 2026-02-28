@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { BaseGlassCard } from '@/components/ui/BaseGlassCard';
 import { useTheme } from '@/hooks/useTheme';
@@ -10,39 +10,33 @@ import { ExternalLink, MessageSquare, Calendar as CalendarIcon, FileQuestion, Ar
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
-export default function PortalDashboard() {
+import { supabase } from '@/lib/supabaseClient';
+
+export default function PortalDashboard({ params }: { params: { taId: string } }) {
+    const { taId } = params;
     const { themeColor, isActive, setIsActive } = useTheme();
     const { courseName, isLoaded } = useSelection();
 
-    const FAQS = [
-        {
-            id: 0,
-            question: "How do I submit Assignment 3?",
-            answer: "Zip your project files and upload them to Canvas under module 4. Ensure your filename includes your student ID.",
-            timestamp: "2026-02-15T14:30:00Z"
-        },
-        {
-            id: 1,
-            question: "What is the late policy?",
-            answer: "10% deduction per day late, up to a maximum of 3 days. After 72 hours, submissions are not accepted. Medical emergencies require documentation to waive this.",
-            timestamp: "2026-02-10T09:15:00Z"
-        },
-        {
-            id: 2,
-            question: "I'm getting a Segmentation Fault in Lab 4.",
-            answer: "Ensure your pointers are initialized (e.g., `Node* p = malloc(sizeof(Node));`) before attempting to set `p->value` in the Graph traversal step. See slide 14 from Tuesday's lecture.",
-            timestamp: "2026-02-27T10:45:00Z" // Most recent
-        },
-        {
-            id: 3,
-            question: "Can we work in pairs for the final project?",
-            answer: "Yes, teams of up to 2 are allowed. Both members must independently submit the final report, but only one needs to upload the codebase codebase on Canvas.",
-            timestamp: "2026-02-25T16:20:00Z"
-        }
-    ];
+    type FAQEntry = { id: string; issue: string; fix: string; created_at: string };
+    const [faqs, setFaqs] = useState<FAQEntry[]>([]);
+    const [faqsLoading, setFaqsLoading] = useState(true);
 
-    // Sort FAQs by newest first
-    const sortedFAQS = [...FAQS].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    useEffect(() => {
+        const fetchFaqs = async () => {
+            setFaqsLoading(true);
+            const { data, error } = await supabase
+                .from('faq_entries')
+                .select('*')
+                .eq('ta_id', taId)
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                setFaqs(data as FAQEntry[]);
+            }
+            setFaqsLoading(false);
+        };
+        fetchFaqs();
+    }, [taId]);
 
     return (
         <div className="w-full h-screen overflow-hidden px-4 md:px-8 pt-4 pb-6 flex flex-col">
@@ -127,7 +121,7 @@ export default function PortalDashboard() {
                             <h3 className="text-lg font-bold text-white">Office Hours Calendar</h3>
                         </div>
                         <div className="flex-1 overflow-y-auto pr-2">
-                            <ManualCalendar />
+                            <ManualCalendar taId={taId} />
                         </div>
                     </BaseGlassCard>
 
@@ -141,24 +135,27 @@ export default function PortalDashboard() {
                         </div>
 
                         <div className="flex flex-col gap-3 overflow-y-auto pr-2 pb-2">
-                            {sortedFAQS.map((faq) => (
+                            {faqsLoading ? (
+                                <div className="flex flex-col gap-3">
+                                    <div className="h-24 w-full animate-pulse rounded-lg bg-white/5 border border-white/10"></div>
+                                    <div className="h-24 w-full animate-pulse rounded-lg bg-white/5 border border-white/10" style={{ animationDelay: '100ms' }}></div>
+                                </div>
+                            ) : faqs.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-6 border border-dashed border-white/10 rounded-lg">
+                                    <p className="text-gray-500 text-sm font-medium">No FAQs posted yet.</p>
+                                </div>
+                            ) : faqs.map((faq) => (
                                 <div key={faq.id} className="grid grid-cols-2 gap-4 rounded-lg border border-white/10 bg-black/40 p-4 transition-colors hover:bg-white/5 shrink-0 items-start">
-                                    <div className="flex flex-col gap-1 pr-4 border-r border-white/10">
-                                        <div className="flex items-center justify-between mb-1">
-                                            <span className="text-[10px] uppercase tracking-wider text-[#8A2BE2] font-semibold opacity-80">Issue</span>
-                                            <span className="text-[10px] text-gray-500 font-medium">
-                                                {new Date(faq.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                            </span>
-                                        </div>
-                                        <h4 className="text-sm font-semibold text-white leading-snug">
-                                            {faq.question}
-                                        </h4>
+                                    {/* Issue Column */}
+                                    <div className="flex flex-col gap-1 border-r border-white/5 pr-4">
+                                        <span className="text-[10px] uppercase tracking-widest font-bold text-gray-500">The Issue</span>
+                                        <p className="text-sm text-gray-300 leading-relaxed font-medium">{faq.issue}</p>
                                     </div>
+
+                                    {/* Fix Column */}
                                     <div className="flex flex-col gap-1 pl-2">
-                                        <span className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold opacity-80 mb-1">Fix</span>
-                                        <p className="text-[11px] leading-relaxed text-gray-400">
-                                            {faq.answer}
-                                        </p>
+                                        <span className="text-[10px] uppercase tracking-widest font-bold text-emerald-500/80">The Fix</span>
+                                        <p className="text-sm text-white leading-relaxed">{faq.fix}</p>
                                     </div>
                                 </div>
                             ))}

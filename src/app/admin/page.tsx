@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminControlPage() {
     const { themeColor, setThemeColor, isActive, setIsActive } = useTheme();
-    const { slots, addSlot, removeSlot, isLoaded } = useSchedule();
+    const { slots, addSlot, removeSlot, isLoaded, isPending } = useSchedule();
 
     // Example State for Link Toggles
     const [links, setLinks] = useState({
@@ -26,17 +26,31 @@ export default function AdminControlPage() {
         locationOrLink: ''
     });
 
-    const handleAddSlot = () => {
+    const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+
+    const showToast = (message: string, type: 'success' | 'error') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3000);
+    };
+
+    const handleAddSlot = async () => {
         if (newSlot.endTime <= newSlot.startTime) {
-            alert("End time must be after start time.");
+            showToast("End time must be after start time.", 'error');
             return;
         }
         if (!newSlot.locationOrLink.trim()) {
-            alert("Please provide a location or meeting link.");
+            showToast("Please provide a location or meeting link.", 'error');
             return;
         }
-        addSlot(newSlot);
-        setNewSlot({ ...newSlot, locationOrLink: '' });
+
+        const { error } = await addSlot(newSlot);
+
+        if (error) {
+            showToast("Failed to sync office hour.", 'error');
+        } else {
+            showToast("Office hour added successfully.", 'success');
+            setNewSlot({ ...newSlot, locationOrLink: '' });
+        }
     };
 
     // Phase 8: Active Task Management System mocks
@@ -285,8 +299,12 @@ export default function AdminControlPage() {
                                                 <input type="text" placeholder="Room 302 or zoom.us/j/..." value={newSlot.locationOrLink} onChange={e => setNewSlot({ ...newSlot, locationOrLink: e.target.value })} className="w-full rounded-lg border border-white/10 bg-black/40 px-4 py-2 text-sm text-white" />
                                             </div>
                                         </div>
-                                        <button onClick={handleAddSlot} className="w-full rounded-lg bg-white/10 py-2.5 font-bold text-white transition-colors hover:bg-white hover:text-black">
-                                            Add Slot
+                                        <button disabled={isPending} onClick={handleAddSlot} className="w-full flex items-center justify-center rounded-lg bg-white/10 py-2.5 font-bold text-white transition-colors hover:bg-white hover:text-black disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white/10 disabled:hover:text-white">
+                                            {isPending ? (
+                                                <div className="h-5 w-5 rounded-full border-2 border-white/20 border-t-white animate-spin"></div>
+                                            ) : (
+                                                'Add Slot'
+                                            )}
                                         </button>
                                     </div>
 
@@ -294,7 +312,10 @@ export default function AdminControlPage() {
                                         <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Current Schedule</h3>
                                         <div className="max-h-[300px] overflow-y-auto pr-2 space-y-2">
                                             {!isLoaded ? (
-                                                <div className="animate-pulse h-12 bg-white/5 rounded-lg border border-white/10"></div>
+                                                <div className="flex flex-col gap-2">
+                                                    <div className="animate-pulse h-16 w-full bg-white/5 rounded-lg border border-white/10"></div>
+                                                    <div className="animate-pulse h-16 w-full bg-white/5 rounded-lg border border-white/10 transition-all delay-75"></div>
+                                                </div>
                                             ) : slots.length === 0 ? (
                                                 <p className="text-sm text-gray-500 italic border border-dashed border-white/10 rounded-lg p-4 text-center">No office hours scheduled yet.</p>
                                             ) : (
@@ -304,7 +325,14 @@ export default function AdminControlPage() {
                                                             <p className="text-sm font-bold text-white">{slot.dayOfWeek}</p>
                                                             <p className="text-xs text-gray-400">{slot.startTime} - {slot.endTime}</p>
                                                         </div>
-                                                        <button onClick={() => removeSlot(slot.id)} className="text-red-400/70 hover:text-red-400 p-2 transition-colors">
+                                                        <button
+                                                            onClick={async () => {
+                                                                const { error } = await removeSlot(slot.id);
+                                                                if (error) showToast("Failed to delete slot.", 'error');
+                                                                else showToast("Slot deleted successfully.", 'success');
+                                                            }}
+                                                            className="text-red-400/70 hover:text-red-400 p-2 transition-colors"
+                                                        >
                                                             <Trash2 className="h-4 w-4" />
                                                         </button>
                                                     </div>
@@ -392,6 +420,26 @@ export default function AdminControlPage() {
                     </div>
                 )}
             </div>
+
+            {/* Database Action Toast */}
+            <AnimatePresence>
+                {toast && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 20, scale: 0.9 }}
+                        className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 backdrop-blur-md px-6 py-3 rounded-xl border shadow-2xl ${toast.type === 'success'
+                                ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-100 shadow-[0_0_20px_rgba(52,211,153,0.2)]'
+                                : 'bg-red-500/10 border-red-500/50 text-red-100 shadow-[0_0_20px_rgba(239,68,68,0.2)]'
+                            }`}
+                    >
+                        <p className="text-sm font-semibold tracking-wide flex items-center gap-2">
+                            {toast.type === 'success' ? <CheckCircle2 className="h-4 w-4 text-emerald-400" /> : <ShieldAlert className="h-4 w-4 text-red-400" />}
+                            {toast.message}
+                        </p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

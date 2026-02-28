@@ -8,8 +8,8 @@ import { MapPin, Link as LinkIcon, X } from 'lucide-react';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
-export function ManualCalendar() {
-    const { slots, isLoaded } = useSchedule();
+export function ManualCalendar({ taId }: { taId?: string }) {
+    const { slots, isLoaded } = useSchedule(taId);
     const { themeColor } = useTheme();
     const [selectedSlot, setSelectedSlot] = useState<OfficeHourSlot | null>(null);
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -20,7 +20,25 @@ export function ManualCalendar() {
         return () => clearInterval(timer);
     }, []);
 
-    if (!isLoaded) return <div className="h-64 w-full animate-pulse rounded-xl border border-white/10 bg-white/5"></div>;
+    if (!isLoaded) {
+        return (
+            <div className="w-full">
+                <div className="grid grid-cols-5 gap-2 md:gap-4">
+                    {DAYS.map((day, i) => (
+                        <div key={day} className="flex flex-col gap-3">
+                            <h4 className="border-b border-white/10 pb-2 text-center text-xs font-bold uppercase tracking-widest text-gray-400">
+                                {day.slice(0, 3)}
+                            </h4>
+                            <div className="flex flex-col gap-2 h-32">
+                                <div className="h-16 w-full animate-pulse rounded-xl bg-white/5 border border-white/10" style={{ animationDelay: `${i * 100}ms` }}></div>
+                                {i % 2 === 0 && <div className="h-16 w-full animate-pulse rounded-xl bg-white/5 border border-white/10" style={{ animationDelay: `${(i * 100) + 50}ms` }}></div>}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
     const isLive = (slot: OfficeHourSlot) => {
         const todayIndex = currentTime.getDay(); // 0 is Sunday

@@ -1,53 +1,67 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
 export type OfficeHourSlot = {
     id: string;
-    dayOfWeek: string; // 'Monday', 'Tuesday', ...
-    startTime: string; // '14:00'
-    endTime: string;   // '16:00'
+    ta_id?: string;
+    dayOfWeek: string;
+    startTime: string;
+    endTime: string;
     locationOrLink: string;
 };
 
-const DEFAULT_SLOTS: OfficeHourSlot[] = [
-    { id: '1', dayOfWeek: 'Monday', startTime: '10:00', endTime: '12:00', locationOrLink: 'zoom.us/j/12345' },
-    { id: '2', dayOfWeek: 'Wednesday', startTime: '14:00', endTime: '16:00', locationOrLink: 'Woodward Hall 332' },
-    { id: '3', dayOfWeek: 'Thursday', startTime: '13:00', endTime: '15:00', locationOrLink: 'meet.google.com/abc' },
-];
-
-export function useSchedule() {
+export function useSchedule(taId?: string) {
     const [slots, setSlots] = useState<OfficeHourSlot[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [isPending, setIsPending] = useState(false);
 
     useEffect(() => {
-        const saved = localStorage.getItem('ta_office_hours');
-        if (saved && saved !== '[]') {
+        const fetchSchedule = async () => {
+            setIsPending(true);
             try {
-                setSlots(JSON.parse(saved));
-            } catch (e) {
-                console.error('Failed to parse schedule', e);
-                setSlots(DEFAULT_SLOTS);
+                let query = supabase.from('office_hours').select('*');
+                if (taId) {
+                    query = query.eq('ta_id', taId);
+                }
+                const { data, error } = await query;
+                if (!error && data) {
+                    // Map snake_case to camelCase if necessary, assuming table columns match type props exactly
+                    setSlots(data);
+                }
+            } catch (err) {
+                console.error('Failed to fetch schedule:', err);
+            } finally {
+                setIsLoaded(true);
+                setIsPending(false);
             }
-        } else if (!saved) {
-            setSlots(DEFAULT_SLOTS);
-            localStorage.setItem('ta_office_hours', JSON.stringify(DEFAULT_SLOTS));
+        };
+
+        fetchSchedule();
+    }, [taId]);
+
+    const addSlot = async (slot: Omit<OfficeHourSlot, 'id'>) => {
+        setIsPending(true);
+        // Default ta_id if not passed
+        const payload = { ...slot, ta_id: slot.ta_id || taId || 'ta-123' };
+        const { data, error } = await supabase.from('office_hours').insert([payload]).select();
+        if (!error && data) {
+            setSlots(prev => [...prev, data[0]]);
         }
-        setIsLoaded(true);
-    }, []);
-
-    const addSlot = (slot: Omit<OfficeHourSlot, 'id'>) => {
-        const newSlot = { ...slot, id: crypto.randomUUID() };
-        const updated = [...slots, newSlot];
-        setSlots(updated);
-        localStorage.setItem('ta_office_hours', JSON.stringify(updated));
+        setIsPending(false);
+        return { error };
     };
 
-    const removeSlot = (id: string) => {
-        const updated = slots.filter(s => s.id !== id);
-        setSlots(updated);
-        localStorage.setItem('ta_office_hours', JSON.stringify(updated));
+    const removeSlot = async (id: string) => {
+        setIsPending(true);
+        const { error } = await supabase.from('office_hours').delete().eq('id', id);
+        if (!error) {
+            setSlots(prev => prev.filter(s => s.id !== id));
+        }
+        setIsPending(false);
+        return { error };
     };
 
-    return { slots, addSlot, removeSlot, isLoaded };
+    return { slots, addSlot, removeSlot, isLoaded, isPending };
 }
