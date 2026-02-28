@@ -11,7 +11,6 @@ import Link from 'next/link';
 
 export default function PortalDashboard() {
     const { themeColor, isActive, setIsActive } = useTheme();
-    const [openFaqId, setOpenFaqId] = useState<number | null>(0);
 
     const FAQS = [
         {
@@ -110,23 +109,55 @@ export default function PortalDashboard() {
                     </BaseGlassCard>
                 </div>
 
-                {/* CENTER PANEL: Office Hours Widget (Span 5) */}
-                <BaseGlassCard delay={0.3} className="md:col-span-5 flex flex-col h-full min-h-0">
-                    <div className="mb-6 flex items-center gap-3 border-b border-white/10 pb-4 shrink-0">
-                        <div className="rounded-full bg-white/10 p-2"><CalendarIcon className="h-5 w-5 text-white" /></div>
-                        <h3 className="text-xl font-bold text-white">Office Hours Calendar</h3>
-                    </div>
-                    {/* The ManualCalendar itself needs to handle its own heights now, ensuring it fills space but scrolls internally if needed. */}
-                    <div className="flex-1 overflow-y-auto pr-2">
-                        <ManualCalendar />
-                    </div>
-                </BaseGlassCard>
+                {/* CENTER PANEL: Weighted Center Stack (Span 6) */}
+                <div className="md:col-span-6 flex flex-col gap-4 md:gap-6 h-full min-h-0">
 
-                {/* RIGHT PANEL: Communication (Span 4) */}
-                <div className="md:col-span-4 flex flex-col gap-4 md:gap-6 h-full min-h-0">
+                    {/* Top Module: Calendar (40% height) */}
+                    <BaseGlassCard delay={0.3} className="flex flex-col h-[40%] min-h-0 shrink-0">
+                        <div className="mb-4 flex items-center gap-3 border-b border-white/10 pb-3 shrink-0">
+                            <div className="rounded-full bg-white/10 p-2"><CalendarIcon className="h-4 w-4 text-white" /></div>
+                            <h3 className="text-lg font-bold text-white">Office Hours Calendar</h3>
+                        </div>
+                        <div className="flex-1 overflow-y-auto pr-2">
+                            <ManualCalendar />
+                        </div>
+                    </BaseGlassCard>
 
-                    {/* Live Chat */}
-                    <BaseGlassCard delay={0.4} className="flex flex-col flex-1 min-h-0">
+                    {/* Bottom Module: AI FAQ */}
+                    <BaseGlassCard delay={0.5} className="flex flex-col flex-1 min-h-0">
+                        <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3 shrink-0">
+                            <div className="flex items-center gap-2">
+                                <FileQuestion className="h-4 w-4 text-white" />
+                                <h3 className="text-sm font-bold text-white">AI Summarized FAQ</h3>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-3 overflow-y-auto pr-2 pb-2">
+                            {FAQS.map((faq) => (
+                                <div key={faq.id} className="grid grid-cols-2 gap-4 rounded-lg border border-white/10 bg-black/40 p-4 transition-colors hover:bg-white/5 shrink-0 items-start">
+                                    <div className="flex flex-col gap-1 pr-4 border-r border-white/10">
+                                        <span className="text-[10px] uppercase tracking-wider text-[#8A2BE2] font-semibold opacity-80">Issue</span>
+                                        <h4 className="text-sm font-semibold text-white leading-snug">
+                                            {faq.question}
+                                        </h4>
+                                    </div>
+                                    <div className="flex flex-col gap-1 pl-2">
+                                        <span className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold opacity-80">Fix</span>
+                                        <p className="text-[11px] leading-relaxed text-gray-400">
+                                            {faq.answer}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </BaseGlassCard>
+                </div>
+
+                {/* RIGHT PANEL: Live Chat (Span 3) */}
+                <div className="md:col-span-3 flex flex-col h-full min-h-0">
+
+                    {/* Live Chat Full Height */}
+                    <BaseGlassCard delay={0.4} className="flex flex-col h-full min-h-0">
                         <div className="mb-3 flex items-center justify-between border-b border-white/10 pb-3 shrink-0">
                             <div className="flex items-center gap-2">
                                 <MessageSquare className="h-4 w-4 text-white" />
@@ -150,62 +181,13 @@ export default function PortalDashboard() {
                             <input
                                 type="text"
                                 placeholder="Message..."
-                                className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white focus:border-white/30 focus:outline-none"
+                                className="flex-1 min-w-0 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white focus:border-white/30 focus:outline-none"
                             />
-                            <button className="rounded-lg bg-white px-3 text-xs font-semibold text-black transition-colors hover:bg-gray-200">
+                            <button className="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-black transition-colors hover:bg-gray-200">
                                 Send
                             </button>
                         </div>
                     </BaseGlassCard>
-
-                    {/* AI FAQ */}
-                    <BaseGlassCard delay={0.5} className="flex flex-col flex-1 min-h-0">
-                        <div className="mb-3 flex items-center justify-between border-b border-white/10 pb-3 shrink-0">
-                            <div className="flex items-center gap-2">
-                                <FileQuestion className="h-4 w-4 text-white" />
-                                <h3 className="text-sm font-bold text-white">AI FAQ</h3>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col gap-2 overflow-y-auto pr-1">
-                            {FAQS.map((faq) => {
-                                const isOpen = openFaqId === faq.id;
-                                return (
-                                    <div key={faq.id} className="overflow-hidden rounded-lg border border-white/10 bg-black/40 transition-colors hover:bg-white/5 shrink-0">
-                                        <button
-                                            onClick={() => setOpenFaqId(isOpen ? null : faq.id)}
-                                            className="flex w-full items-center justify-between p-3 text-left focus:outline-none"
-                                        >
-                                            <h4 className={`text-xs font-semibold pr-2 transition-colors ${isOpen ? 'text-white' : 'text-gray-300'}`}>
-                                                {faq.question}
-                                            </h4>
-                                            <motion.div
-                                                animate={{ rotate: isOpen ? 180 : 0 }}
-                                                transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-                                                className="shrink-0"
-                                            >
-                                                <svg className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                                </svg>
-                                            </motion.div>
-                                        </button>
-
-                                        <motion.div
-                                            initial={false}
-                                            animate={{ height: isOpen ? 'auto' : 0, opacity: isOpen ? 1 : 0 }}
-                                            transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-                                            className="overflow-hidden"
-                                        >
-                                            <div className="border-t border-white/5 p-3 pt-2 text-[11px] leading-relaxed text-gray-400">
-                                                {faq.answer}
-                                            </div>
-                                        </motion.div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </BaseGlassCard>
-
                 </div>
             </div>
         </div>
