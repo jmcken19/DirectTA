@@ -84,7 +84,7 @@ export default function PortalDashboard() {
                         <p className="mt-1 text-sm text-gray-400">Teaching Assistant</p>
                     </BaseGlassCard>
 
-                    <BaseGlassCard delay={0.2} className="flex flex-col flex-1 min-h-0">
+                    <BaseGlassCard delay={0.2} className="flex flex-col flex-1 min-h-0" innerClassName="flex flex-col h-full min-h-0">
                         <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-gray-400 shrink-0">Connect</h3>
                         <div className="flex flex-col gap-2 overflow-y-auto pr-2">
                             <a href="#" className="group flex w-full items-center justify-between rounded-lg border border-white/5 bg-white/5 p-3 min-h-[50px] transition-all hover:bg-white/10 hover:border-white/20 shrink-0">
@@ -110,7 +110,7 @@ export default function PortalDashboard() {
                 <div className="md:col-span-6 flex flex-col gap-4 md:gap-6 h-full min-h-0">
 
                     {/* Top Module: Calendar (40% height) */}
-                    <BaseGlassCard delay={0.3} className="flex flex-col h-[40%] min-h-0 shrink-0">
+                    <BaseGlassCard delay={0.3} className="flex flex-col h-[40%] min-h-0 shrink-0" innerClassName="flex flex-col h-full min-h-0">
                         <div className="mb-4 flex items-center gap-3 border-b border-white/10 pb-3 shrink-0">
                             <div className="rounded-full bg-white/10 p-2"><CalendarIcon className="h-4 w-4 text-white" /></div>
                             <h3 className="text-lg font-bold text-white">Office Hours Calendar</h3>
@@ -121,7 +121,7 @@ export default function PortalDashboard() {
                     </BaseGlassCard>
 
                     {/* Bottom Module: AI FAQ */}
-                    <BaseGlassCard delay={0.5} className="flex flex-col flex-1 min-h-0">
+                    <BaseGlassCard delay={0.5} className="flex flex-col flex-1 min-h-0" innerClassName="flex flex-col h-full min-h-0">
                         <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3 shrink-0">
                             <div className="flex items-center gap-2">
                                 <FileQuestion className="h-4 w-4 text-white" />
@@ -154,7 +154,7 @@ export default function PortalDashboard() {
                 <div className="md:col-span-3 flex flex-col h-full min-h-0">
 
                     {/* Live Chat Full Height */}
-                    <BaseGlassCard delay={0.4} className="flex flex-col h-full min-h-0">
+                    <BaseGlassCard delay={0.4} className="flex flex-col h-full min-h-0" innerClassName="flex flex-col h-full min-h-0">
                         <div className="mb-3 flex items-center justify-between border-b border-white/10 pb-3 shrink-0">
                             <div className="flex items-center gap-2">
                                 <MessageSquare className="h-4 w-4 text-white" />

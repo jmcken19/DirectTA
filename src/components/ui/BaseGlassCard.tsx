@@ -7,10 +7,11 @@ import { ReactNode } from 'react';
 interface BaseGlassCardProps extends HTMLMotionProps<'div'> {
     children: ReactNode;
     className?: string;
+    innerClassName?: string;
     delay?: number;
 }
 
-export function BaseGlassCard({ children, className, delay = 0, ...props }: BaseGlassCardProps) {
+export function BaseGlassCard({ children, className, innerClassName, delay = 0, ...props }: BaseGlassCardProps) {
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -28,7 +29,7 @@ export function BaseGlassCard({ children, className, delay = 0, ...props }: Base
             {...props}
         >
             {/* Optional internal gradient noise or borders can be added here */}
-            <div className="relative z-10">{children}</div>
+            <div className={cn("relative z-10", innerClassName)}>{children}</div>
         </motion.div>
     );
 }
