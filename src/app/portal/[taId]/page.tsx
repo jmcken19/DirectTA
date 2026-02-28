@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import { BaseGlassCard } from '@/components/ui/BaseGlassCard';
 import { useTheme } from '@/hooks/useTheme';
 import { ManualCalendar } from '@/components/modules/ManualCalendar';
@@ -9,6 +11,30 @@ import Link from 'next/link';
 
 export default function PortalDashboard() {
     const { themeColor, isActive, setIsActive } = useTheme();
+    const [openFaqId, setOpenFaqId] = useState<number | null>(0);
+
+    const FAQS = [
+        {
+            id: 0,
+            question: "How do I submit Assignment 3?",
+            answer: "Zip your project files and upload them to Canvas under module 4. Ensure your filename includes your student ID."
+        },
+        {
+            id: 1,
+            question: "What is the late policy?",
+            answer: "10% deduction per day late, up to a maximum of 3 days. After 72 hours, submissions are not accepted. Medical emergencies require documentation to waive this."
+        },
+        {
+            id: 2,
+            question: "I'm getting a Segmentation Fault in Lab 4.",
+            answer: "Ensure your pointers are initialized (e.g., `Node* p = malloc(sizeof(Node));`) before attempting to set `p->value` in the Graph traversal step. See slide 14 from Tuesday's lecture."
+        },
+        {
+            id: 3,
+            question: "Can we work in pairs for the final project?",
+            answer: "Yes, teams of up to 2 are allowed. Both members must independently submit the final report, but only one needs to upload the codebase codebase on Canvas."
+        }
+    ];
 
     return (
         <div className="w-full max-w-6xl pt-4 pb-10">
@@ -92,16 +118,44 @@ export default function PortalDashboard() {
                     <div className="mb-6 flex items-center gap-3 border-b border-white/10 pb-4">
                         <div className="rounded-full bg-white/10 p-2"><FileQuestion className="h-5 w-5 text-white" /></div>
                         <h3 className="text-xl font-bold text-white">AI Summarized FAQ</h3>
+                        <span className="ml-auto text-xs text-gray-400 italic">Auto-generated from recent student queries</span>
                     </div>
-                    <div className="grid gap-4 md:grid-cols-2">
-                        <div className="rounded-xl border border-white/10 bg-black/40 p-5">
-                            <h4 className="font-semibold text-white mb-2">Q: How do I submit Assignment 3?</h4>
-                            <p className="text-sm text-gray-400">A: Zip your project files and upload them to Canvas under module 4. Ensure your filename includes your student ID.</p>
-                        </div>
-                        <div className="rounded-xl border border-white/10 bg-black/40 p-5">
-                            <h4 className="font-semibold text-white mb-2">Q: What is the late policy?</h4>
-                            <p className="text-sm text-gray-400">A: 10% deduction per day late, up to a maximum of 3 days. After 72 hours, submissions are not accepted.</p>
-                        </div>
+
+                    <div className="flex flex-col gap-3">
+                        {FAQS.map((faq) => {
+                            const isOpen = openFaqId === faq.id;
+                            return (
+                                <div key={faq.id} className="overflow-hidden rounded-xl border border-white/10 bg-black/40 transition-colors hover:bg-white/5">
+                                    <button
+                                        onClick={() => setOpenFaqId(isOpen ? null : faq.id)}
+                                        className="flex w-full items-center justify-between p-5 text-left focus:outline-none"
+                                    >
+                                        <h4 className={`font-semibold transition-colors ${isOpen ? 'text-white' : 'text-gray-300'}`}>
+                                            Q: {faq.question}
+                                        </h4>
+                                        <motion.div
+                                            animate={{ rotate: isOpen ? 180 : 0 }}
+                                            transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                                        >
+                                            <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </motion.div>
+                                    </button>
+
+                                    <motion.div
+                                        initial={false}
+                                        animate={{ height: isOpen ? 'auto' : 0, opacity: isOpen ? 1 : 0 }}
+                                        transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                                        className="overflow-hidden"
+                                    >
+                                        <div className="border-t border-white/5 p-5 pt-0 mt-2 text-sm text-gray-400">
+                                            A: {faq.answer}
+                                        </div>
+                                    </motion.div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </BaseGlassCard>
 
