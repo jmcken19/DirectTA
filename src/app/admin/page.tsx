@@ -138,7 +138,10 @@ export default function AdminControlPage() {
 
                         <div className="grid gap-4 md:grid-cols-2 mb-6">
                             <div className="rounded border border-white/10 bg-white/5 p-4">
-                                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2 block">Issue</span>
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Issue</span>
+                                    <span className="text-[10px] text-gray-500 font-medium">Feb 27</span>
+                                </div>
                                 <p className="text-sm text-white">Students are getting segfaults because they are assigning values to uninitialized pointers in the Graph traversal step.</p>
                             </div>
                             <div className="rounded border border-white/10 bg-white/5 p-4">
@@ -166,7 +169,10 @@ export default function AdminControlPage() {
 
                         <div className="grid gap-4 md:grid-cols-2 mb-6">
                             <div className="rounded border border-white/10 bg-white/5 p-4">
-                                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2 block">Issue</span>
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Issue</span>
+                                    <span className="text-[10px] text-gray-500 font-medium">Feb 25</span>
+                                </div>
                                 <p className="text-sm text-white">Are we allowed to work in pairs and do both members need to submit the codebase?</p>
                             </div>
                             <div className="rounded border border-white/10 bg-white/5 p-4">

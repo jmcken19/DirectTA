@@ -16,24 +16,31 @@ export default function PortalDashboard() {
         {
             id: 0,
             question: "How do I submit Assignment 3?",
-            answer: "Zip your project files and upload them to Canvas under module 4. Ensure your filename includes your student ID."
+            answer: "Zip your project files and upload them to Canvas under module 4. Ensure your filename includes your student ID.",
+            timestamp: "2026-02-15T14:30:00Z"
         },
         {
             id: 1,
             question: "What is the late policy?",
-            answer: "10% deduction per day late, up to a maximum of 3 days. After 72 hours, submissions are not accepted. Medical emergencies require documentation to waive this."
+            answer: "10% deduction per day late, up to a maximum of 3 days. After 72 hours, submissions are not accepted. Medical emergencies require documentation to waive this.",
+            timestamp: "2026-02-10T09:15:00Z"
         },
         {
             id: 2,
             question: "I'm getting a Segmentation Fault in Lab 4.",
-            answer: "Ensure your pointers are initialized (e.g., `Node* p = malloc(sizeof(Node));`) before attempting to set `p->value` in the Graph traversal step. See slide 14 from Tuesday's lecture."
+            answer: "Ensure your pointers are initialized (e.g., `Node* p = malloc(sizeof(Node));`) before attempting to set `p->value` in the Graph traversal step. See slide 14 from Tuesday's lecture.",
+            timestamp: "2026-02-27T10:45:00Z" // Most recent
         },
         {
             id: 3,
             question: "Can we work in pairs for the final project?",
-            answer: "Yes, teams of up to 2 are allowed. Both members must independently submit the final report, but only one needs to upload the codebase codebase on Canvas."
+            answer: "Yes, teams of up to 2 are allowed. Both members must independently submit the final report, but only one needs to upload the codebase codebase on Canvas.",
+            timestamp: "2026-02-25T16:20:00Z"
         }
     ];
+
+    // Sort FAQs by newest first
+    const sortedFAQS = [...FAQS].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
     return (
         <div className="w-full h-screen overflow-hidden px-4 md:px-8 pt-4 pb-6 flex flex-col">
@@ -130,16 +137,21 @@ export default function PortalDashboard() {
                         </div>
 
                         <div className="flex flex-col gap-3 overflow-y-auto pr-2 pb-2">
-                            {FAQS.map((faq) => (
+                            {sortedFAQS.map((faq) => (
                                 <div key={faq.id} className="grid grid-cols-2 gap-4 rounded-lg border border-white/10 bg-black/40 p-4 transition-colors hover:bg-white/5 shrink-0 items-start">
                                     <div className="flex flex-col gap-1 pr-4 border-r border-white/10">
-                                        <span className="text-[10px] uppercase tracking-wider text-[#8A2BE2] font-semibold opacity-80">Issue</span>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-[10px] uppercase tracking-wider text-[#8A2BE2] font-semibold opacity-80">Issue</span>
+                                            <span className="text-[10px] text-gray-500 font-medium">
+                                                {new Date(faq.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                            </span>
+                                        </div>
                                         <h4 className="text-sm font-semibold text-white leading-snug">
                                             {faq.question}
                                         </h4>
                                     </div>
                                     <div className="flex flex-col gap-1 pl-2">
-                                        <span className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold opacity-80">Fix</span>
+                                        <span className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold opacity-80 mb-1">Fix</span>
                                         <p className="text-[11px] leading-relaxed text-gray-400">
                                             {faq.answer}
                                         </p>
