@@ -50,6 +50,7 @@ export function ManualCalendar() {
 
     const isUrl = (str: string) => {
         try {
+            if (str.includes('http') || str.includes('.com') || str.includes('.us') || str.includes('zoom') || str.includes('meet')) return true;
             new URL(str);
             return true;
         } catch {
@@ -65,37 +66,58 @@ export function ManualCalendar() {
                         <h4 className="border-b border-white/10 pb-2 text-center text-xs font-bold uppercase tracking-widest text-gray-400">
                             {day.slice(0, 3)}
                         </h4>
-                        <div className="flex min-h-[100px] flex-col gap-2">
-                            {slots
-                                .filter(s => s.dayOfWeek === day)
-                                .sort((a, b) => a.startTime.localeCompare(b.startTime))
-                                .map(slot => {
-                                    const live = isLive(slot);
-                                    return (
-                                        <motion.button
-                                            key={slot.id}
-                                            onClick={() => setSelectedSlot(slot)}
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
-                                            className={`relative w-full overflow-hidden rounded-lg border p-2 text-left backdrop-blur-md transition-colors ${live
+                        <div className="flex h-full min-h-[120px] flex-col gap-2">
+                            {slots.filter(s => s.dayOfWeek === day).length === 0 ? (
+                                <div className="flex flex-1 items-center justify-center p-2">
+                                    <span className="text-center text-xs text-gray-500">No office hours</span>
+                                </div>
+                            ) : (
+                                slots
+                                    .filter(s => s.dayOfWeek === day)
+                                    .sort((a, b) => a.startTime.localeCompare(b.startTime))
+                                    .map(slot => {
+                                        const live = isLive(slot);
+                                        return (
+                                            <motion.button
+                                                key={slot.id}
+                                                onClick={() => setSelectedSlot(slot)}
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
+                                                className={`relative flex w-full flex-col gap-2 overflow-hidden rounded-xl border p-3 text-left backdrop-blur-lg transition-all ${live
                                                     ? 'border-transparent bg-white/10 text-white shadow-lg'
-                                                    : 'border-white/10 bg-black/40 text-gray-300 hover:bg-white/5'
-                                                }`}
-                                        >
-                                            {/* Aura effect matches the custom TA theme color */}
-                                            {live && (
-                                                <motion.div
-                                                    className="absolute inset-0 -z-10 opacity-50 blur-xl"
-                                                    style={{ backgroundColor: themeColor }}
-                                                    animate={{ opacity: [0.3, 0.7, 0.3] }}
-                                                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                                                />
-                                            )}
-                                            <div className="text-xs font-semibold">{formatTime(slot.startTime)}</div>
-                                            <div className="text-[10px] text-gray-400">{formatTime(slot.endTime)}</div>
-                                        </motion.button>
-                                    );
-                                })}
+                                                    : 'border-white/10 bg-black/40 text-gray-300 hover:border-white/20 hover:bg-white/5'
+                                                    }`}
+                                            >
+                                                {/* Aura effect matches the custom TA theme color */}
+                                                {live && (
+                                                    <motion.div
+                                                        className="absolute inset-0 -z-10 opacity-50 blur-xl"
+                                                        style={{ backgroundColor: themeColor }}
+                                                        animate={{ opacity: [0.3, 0.7, 0.3] }}
+                                                        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                                                    />
+                                                )}
+                                                <div className="flex w-full items-center justify-between">
+                                                    <div className="text-xs font-bold text-white">{formatTime(slot.startTime)}</div>
+                                                    <div className="text-[10px] text-gray-400">{formatTime(slot.endTime)}</div>
+                                                </div>
+
+                                                {/* The Action Button */}
+                                                <div className="mt-1 flex w-full items-center justify-center gap-1 rounded-md bg-white/10 px-2 py-1.5 text-center text-[10px] font-semibold transition-colors hover:bg-white/20 hover:text-white">
+                                                    {isUrl(slot.locationOrLink) ? (
+                                                        <>
+                                                            <LinkIcon className="h-3 w-3" /> Join Meeting
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <MapPin className="h-3 w-3" /> {slot.locationOrLink}
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </motion.button>
+                                        );
+                                    })
+                            )}
                         </div>
                     </div>
                 ))}
