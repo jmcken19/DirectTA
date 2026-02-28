@@ -4,7 +4,7 @@ import { BaseGlassCard } from '@/components/ui/BaseGlassCard';
 import { useTheme } from '@/hooks/useTheme';
 import { useSchedule } from '@/hooks/useSchedule';
 import { Settings, Link as LinkIcon, Calendar, CheckCircle2, ShieldAlert, Trash2, ArrowLeft, MessageSquare, Clock } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -362,7 +362,7 @@ export default function AdminControlPage() {
                                                 </div>
 
                                                 <div className="bg-white/5 rounded p-3 text-xs text-gray-300 italic line-clamp-2">
-                                                    "{chat.preview}"
+                                                    &quot;{chat.preview}&quot;
                                                 </div>
 
                                                 <div className="flex gap-2 mt-1">

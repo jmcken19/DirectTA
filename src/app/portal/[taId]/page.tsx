@@ -6,7 +6,7 @@ import { BaseGlassCard } from '@/components/ui/BaseGlassCard';
 import { useTheme } from '@/hooks/useTheme';
 import { useSelection } from '@/hooks/useSelection';
 import { ManualCalendar } from '@/components/modules/ManualCalendar';
-import { BellRing, ExternalLink, MessageSquare, Calendar as CalendarIcon, FileQuestion, ArrowLeft } from 'lucide-react';
+import { ExternalLink, MessageSquare, Calendar as CalendarIcon, FileQuestion, ArrowLeft, BellRing } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 

@@ -3,9 +3,9 @@
  */
 export function getLuminance(hex: string) {
     const parse = (str: string) => parseInt(str, 16);
-    let r = parse(hex.substring(1, 3)) / 255;
-    let g = parse(hex.substring(3, 5)) / 255;
-    let b = parse(hex.substring(5, 7)) / 255;
+    const r = parse(hex.substring(1, 3)) / 255;
+    const g = parse(hex.substring(3, 5)) / 255;
+    const b = parse(hex.substring(5, 7)) / 255;
 
     const lum = (val: number) => {
         return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
