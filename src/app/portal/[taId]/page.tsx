@@ -2,6 +2,7 @@
 
 import { BaseGlassCard } from '@/components/ui/BaseGlassCard';
 import { useTheme } from '@/hooks/useTheme';
+import { ManualCalendar } from '@/components/modules/ManualCalendar';
 import { BellRing, ExternalLink, MessageSquare, Calendar as CalendarIcon, FileQuestion } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -102,12 +103,7 @@ export default function PortalDashboard() {
                         <div className="rounded-full bg-white/10 p-2"><CalendarIcon className="h-5 w-5 text-white" /></div>
                         <h3 className="text-xl font-bold text-white">Office Hours Calendar</h3>
                     </div>
-                    <div className="flex h-64 w-full items-center justify-center rounded-xl border border-white/10 bg-white/5 border-dashed">
-                        <p className="text-gray-500 flex items-center gap-2">
-                            <CalendarIcon className="h-5 w-5" />
-                            [Embedded Google Calendar Widget Placeholder]
-                        </p>
-                    </div>
+                    <ManualCalendar />
                 </BaseGlassCard>
 
                 {/* 3. Live Chat Module */}

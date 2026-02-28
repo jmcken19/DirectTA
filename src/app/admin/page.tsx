@@ -2,11 +2,13 @@
 
 import { BaseGlassCard } from '@/components/ui/BaseGlassCard';
 import { useTheme } from '@/hooks/useTheme';
-import { Settings, Link as LinkIcon, Calendar, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { useSchedule } from '@/hooks/useSchedule';
+import { Settings, Link as LinkIcon, Calendar, CheckCircle2, ShieldAlert, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 export default function AdminControlPage() {
     const { themeColor, setThemeColor, isActive, setIsActive } = useTheme();
+    const { slots, addSlot, removeSlot, isLoaded } = useSchedule();
 
     // Example State for Link Toggles
     const [links, setLinks] = useState({
@@ -14,6 +16,26 @@ export default function AdminControlPage() {
         linkedin: false,
         website: true,
     });
+
+    const [newSlot, setNewSlot] = useState({
+        dayOfWeek: 'Monday',
+        startTime: '13:00',
+        endTime: '15:00',
+        locationOrLink: ''
+    });
+
+    const handleAddSlot = () => {
+        if (newSlot.endTime <= newSlot.startTime) {
+            alert("End time must be after start time.");
+            return;
+        }
+        if (!newSlot.locationOrLink.trim()) {
+            alert("Please provide a location or meeting link.");
+            return;
+        }
+        addSlot(newSlot);
+        setNewSlot({ ...newSlot, locationOrLink: '' });
+    };
 
     return (
         <div className="w-full max-w-5xl pt-10 pb-20">
@@ -113,7 +135,7 @@ export default function AdminControlPage() {
                             </div>
                             <div className="rounded border border-white/10 bg-white/5 p-4">
                                 <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2 block">AI Fix Summary</span>
-                                <p className="text-sm text-white">Ensure pointers are initialized (e.g., `Node* p = malloc(sizeof(Node));`) before attempting to set `p->value`.</p>
+                                <p className="text-sm text-white">Ensure pointers are initialized (e.g., `Node* p = malloc(sizeof(Node));`) before attempting to set `p-&gt;value`.</p>
                             </div>
                         </div>
 
@@ -133,35 +155,64 @@ export default function AdminControlPage() {
                 <BaseGlassCard delay={0.4} className="lg:col-span-2 flex flex-col gap-6">
                     <div className="border-b border-white/10 pb-4 flex items-center gap-3">
                         <Calendar className="h-5 w-5 text-gray-400" />
-                        <h2 className="text-xl font-bold text-white">Office Hours Configuration</h2>
+                        <h2 className="text-xl font-bold text-white">Office Hours Management</h2>
                     </div>
 
                     <div className="grid gap-6 md:grid-cols-2">
                         <div className="space-y-4">
-                            <div>
-                                <label className="mb-2 block text-sm font-semibold text-white">Weekly Schedule</label>
-                                <textarea
-                                    rows={3}
-                                    className="w-full rounded-lg border border-white/10 bg-black/40 px-4 py-3 text-sm text-white focus:border-white/50 focus:outline-none"
-                                    placeholder="e.g. Tuesdays 2:00 PM - 4:00 PM, Thursdays 10:00 AM - 12:00 PM"
-                                    defaultValue="Tuesdays 2:00 PM - 4:00 PM\nThursdays 10:00 AM - 12:00 PM"
-                                />
+                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Add New Block</h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="col-span-2">
+                                    <label className="mb-1 block text-xs font-semibold text-white">Day of Week</label>
+                                    <select
+                                        value={newSlot.dayOfWeek}
+                                        onChange={e => setNewSlot({ ...newSlot, dayOfWeek: e.target.value })}
+                                        className="w-full rounded-lg border border-white/10 bg-black/40 px-4 py-2 text-sm text-white focus:border-white/50 focus:outline-none appearance-none"
+                                    >
+                                        {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map(d => (
+                                            <option key={d} value={d}>{d}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-xs font-semibold text-white">Start Time</label>
+                                    <input type="time" value={newSlot.startTime} onChange={e => setNewSlot({ ...newSlot, startTime: e.target.value })} className="w-full rounded-lg border border-white/10 bg-black/40 px-4 py-2 text-sm text-white [color-scheme:dark]" />
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-xs font-semibold text-white">End Time</label>
+                                    <input type="time" value={newSlot.endTime} onChange={e => setNewSlot({ ...newSlot, endTime: e.target.value })} className="w-full rounded-lg border border-white/10 bg-black/40 px-4 py-2 text-sm text-white [color-scheme:dark]" />
+                                </div>
+                                <div className="col-span-2">
+                                    <label className="mb-1 block text-xs font-semibold text-white">Location / Link</label>
+                                    <input type="text" placeholder="Room 302 or zoom.us/j/..." value={newSlot.locationOrLink} onChange={e => setNewSlot({ ...newSlot, locationOrLink: e.target.value })} className="w-full rounded-lg border border-white/10 bg-black/40 px-4 py-2 text-sm text-white" />
+                                </div>
                             </div>
+                            <button onClick={handleAddSlot} className="w-full rounded-lg bg-white/10 py-2.5 font-bold text-white transition-colors hover:bg-white hover:text-black">
+                                Add Slot
+                            </button>
                         </div>
 
                         <div className="space-y-4">
-                            <div>
-                                <label className="mb-2 block text-sm font-semibold text-white">Direct Video Link (Zoom/Meet)</label>
-                                <input
-                                    type="url"
-                                    className="w-full rounded-lg border border-white/10 bg-black/40 px-4 py-3 text-sm text-white focus:border-white/50 focus:outline-none"
-                                    placeholder="https://zoom.us/j/123456789"
-                                    defaultValue="https://zoom.us/j/987654321"
-                                />
+                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Current Schedule</h3>
+                            <div className="max-h-[300px] overflow-y-auto pr-2 space-y-2">
+                                {!isLoaded ? (
+                                    <div className="animate-pulse h-12 bg-white/5 rounded-lg border border-white/10"></div>
+                                ) : slots.length === 0 ? (
+                                    <p className="text-sm text-gray-500 italic border border-dashed border-white/10 rounded-lg p-4 text-center">No office hours scheduled yet.</p>
+                                ) : (
+                                    slots.sort((a, b) => a.dayOfWeek.localeCompare(b.dayOfWeek)).map(slot => (
+                                        <div key={slot.id} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-3">
+                                            <div>
+                                                <p className="text-sm font-bold text-white">{slot.dayOfWeek}</p>
+                                                <p className="text-xs text-gray-400">{slot.startTime} - {slot.endTime}</p>
+                                            </div>
+                                            <button onClick={() => removeSlot(slot.id)} className="text-red-400/70 hover:text-red-400 p-2 transition-colors">
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
                             </div>
-                            <button className="w-full rounded-lg bg-white/10 py-3 font-bold text-white transition-colors hover:bg-white hover:text-black">
-                                Save Schedule
-                            </button>
                         </div>
                     </div>
                 </BaseGlassCard>
