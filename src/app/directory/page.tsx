@@ -27,7 +27,6 @@ export default function DirectoryPage() {
                     <p className="text-gray-400">Select your Teaching Assistant to access their portal.</p>
                 </div>
                 <div className="hidden md:block">
-                    <span className="text-sm font-semibold tracking-widest text-[#8A2BE2] opacity-80 uppercase">C Charlotte</span>
                 </div>
             </div>
 

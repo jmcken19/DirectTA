@@ -5,12 +5,7 @@ export default function Home() {
   return (
     <div className="flex h-full min-h-[80vh] w-full flex-col items-center justify-center pt-10">
 
-      {/* Top Brand */}
-      <div className="absolute top-8 left-8">
-        <h1 className="text-2xl font-black tracking-tighter text-white">
-          C CHARLOTTE
-        </h1>
-      </div>
+
 
       <BaseGlassCard delay={0.2} className="flex w-full max-w-md flex-col items-center gap-8 p-10 text-center">
         {/* Welcome */}

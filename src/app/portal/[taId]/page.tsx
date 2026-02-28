@@ -44,9 +44,6 @@ export default function PortalDashboard() {
                     <Link href="/directory" className="inline-flex items-center gap-2 text-sm font-semibold text-gray-400 hover:text-white transition-colors border-r border-white/10 pr-4">
                         <ArrowLeft className="h-4 w-4" /> Back
                     </Link>
-                    <span className="text-sm font-semibold tracking-widest text-[#8A2BE2] opacity-80 uppercase hidden sm:block">
-                        C Charlotte
-                    </span>
                 </div>
 
                 <div className="flex items-center gap-4">
