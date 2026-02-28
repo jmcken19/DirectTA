@@ -110,8 +110,8 @@ export default function PortalDashboard() {
                     </BaseGlassCard>
                 </div>
 
-                {/* CENTER PANEL: Office Hours Widget (Span 6) */}
-                <BaseGlassCard delay={0.3} className="md:col-span-6 flex flex-col h-full min-h-0">
+                {/* CENTER PANEL: Office Hours Widget (Span 5) */}
+                <BaseGlassCard delay={0.3} className="md:col-span-5 flex flex-col h-full min-h-0">
                     <div className="mb-6 flex items-center gap-3 border-b border-white/10 pb-4 shrink-0">
                         <div className="rounded-full bg-white/10 p-2"><CalendarIcon className="h-5 w-5 text-white" /></div>
                         <h3 className="text-xl font-bold text-white">Office Hours Calendar</h3>
@@ -122,8 +122,8 @@ export default function PortalDashboard() {
                     </div>
                 </BaseGlassCard>
 
-                {/* RIGHT PANEL: Communication (Span 3) */}
-                <div className="md:col-span-3 flex flex-col gap-4 md:gap-6 h-full min-h-0">
+                {/* RIGHT PANEL: Communication (Span 4) */}
+                <div className="md:col-span-4 flex flex-col gap-4 md:gap-6 h-full min-h-0">
 
                     {/* Live Chat */}
                     <BaseGlassCard delay={0.4} className="flex flex-col flex-1 min-h-0">
