@@ -121,11 +121,11 @@ export default function PortalDashboard() {
                         <span className="ml-auto text-xs text-gray-400 italic">Auto-generated from recent student queries</span>
                     </div>
 
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                         {FAQS.map((faq) => {
                             const isOpen = openFaqId === faq.id;
                             return (
-                                <div key={faq.id} className="overflow-hidden rounded-xl border border-white/10 bg-black/40 transition-colors hover:bg-white/5">
+                                <div key={faq.id} className="overflow-hidden rounded-xl border border-white/10 bg-black/40 transition-colors hover:bg-white/5 shrink-0">
                                     <button
                                         onClick={() => setOpenFaqId(isOpen ? null : faq.id)}
                                         className="flex w-full items-center justify-between p-5 text-left focus:outline-none"
