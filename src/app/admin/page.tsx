@@ -3,8 +3,9 @@
 import { BaseGlassCard } from '@/components/ui/BaseGlassCard';
 import { useTheme } from '@/hooks/useTheme';
 import { useSchedule } from '@/hooks/useSchedule';
-import { Settings, Link as LinkIcon, Calendar, CheckCircle2, ShieldAlert, Trash2 } from 'lucide-react';
+import { Settings, Link as LinkIcon, Calendar, CheckCircle2, ShieldAlert, Trash2, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function AdminControlPage() {
     const { themeColor, setThemeColor, isActive, setIsActive } = useTheme();
@@ -39,6 +40,13 @@ export default function AdminControlPage() {
 
     return (
         <div className="w-full max-w-5xl pt-10 pb-20">
+
+            {/* Back Button */}
+            <div className="mb-6">
+                <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-gray-400 hover:text-white transition-colors">
+                    <ArrowLeft className="h-4 w-4" /> Back to Gateway
+                </Link>
+            </div>
 
             {/* Header */}
             <div className="mb-10 flex items-center justify-between">

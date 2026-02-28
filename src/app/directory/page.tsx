@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { BaseGlassCard } from '@/components/ui/BaseGlassCard';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ArrowLeft } from 'lucide-react';
 
 const MOCK_TAS = [
     { id: '1', name: 'Alex Mercer', course: 'CS101: Intro to Computer Science' },
@@ -12,6 +12,13 @@ const MOCK_TAS = [
 export default function DirectoryPage() {
     return (
         <div className="w-full max-w-4xl pt-10">
+
+            {/* Back Button */}
+            <div className="mb-4">
+                <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-gray-400 hover:text-white transition-colors">
+                    <ArrowLeft className="h-4 w-4" /> Back to Gateway
+                </Link>
+            </div>
 
             {/* Header */}
             <div className="mb-12 flex items-center justify-between">

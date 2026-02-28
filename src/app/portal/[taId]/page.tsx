@@ -3,14 +3,22 @@
 import { BaseGlassCard } from '@/components/ui/BaseGlassCard';
 import { useTheme } from '@/hooks/useTheme';
 import { ManualCalendar } from '@/components/modules/ManualCalendar';
-import { BellRing, ExternalLink, MessageSquare, Calendar as CalendarIcon, FileQuestion } from 'lucide-react';
+import { BellRing, ExternalLink, MessageSquare, Calendar as CalendarIcon, FileQuestion, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 export default function PortalDashboard() {
     const { themeColor, isActive, setIsActive } = useTheme();
 
     return (
         <div className="w-full max-w-6xl pt-4 pb-10">
+
+            {/* Back Button */}
+            <div className="mb-4">
+                <Link href="/directory" className="inline-flex items-center gap-2 text-sm font-semibold text-gray-400 hover:text-white transition-colors">
+                    <ArrowLeft className="h-4 w-4" /> Back to Directory
+                </Link>
+            </div>
 
             {/* Header */}
             <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-4">
