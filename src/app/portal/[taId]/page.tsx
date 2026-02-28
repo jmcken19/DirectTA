@@ -59,10 +59,10 @@ export default function PortalDashboard() {
             </div>
 
             {/* Full-Width 12-Column Bento Grid */}
-            <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-12 flex-1 min-h-0">
+            <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-12 flex-1">
 
                 {/* LEFT PANEL: Identity (Span 3) */}
-                <div className="md:col-span-3 flex flex-col gap-4 md:gap-6 h-full min-h-0">
+                <div className="md:col-span-3 flex flex-col gap-4 md:gap-6">
                     <BaseGlassCard delay={0.1} className="flex flex-col items-center justify-center p-6 text-center shrink-0">
                         <div className="relative mb-6 mt-4">
                             <div className="relative h-28 w-28 overflow-hidden rounded-full border border-white/20 bg-[#111]">
@@ -107,7 +107,7 @@ export default function PortalDashboard() {
                 </div>
 
                 {/* CENTER PANEL: Weighted Center Stack (Span 6) */}
-                <div className="md:col-span-6 flex flex-col gap-4 md:gap-6 h-full min-h-0">
+                <div className="md:col-span-6 flex flex-col gap-4 md:gap-6">
 
                     {/* Top Module: Calendar (40% height) */}
                     <BaseGlassCard delay={0.3} className="flex flex-col h-[40%] min-h-0 shrink-0">
@@ -121,7 +121,7 @@ export default function PortalDashboard() {
                     </BaseGlassCard>
 
                     {/* Bottom Module: AI FAQ */}
-                    <BaseGlassCard delay={0.5} className="flex flex-col flex-1 min-h-0">
+                    <BaseGlassCard delay={0.5} className="flex flex-col h-auto">
                         <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3 shrink-0">
                             <div className="flex items-center gap-2">
                                 <FileQuestion className="h-4 w-4 text-white" />
@@ -129,7 +129,7 @@ export default function PortalDashboard() {
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-3 overflow-y-auto pr-2 pb-2">
+                        <div className="flex flex-col gap-3 pb-2 pt-1 h-auto">
                             {FAQS.map((faq) => (
                                 <div key={faq.id} className="grid grid-cols-2 gap-4 rounded-lg border border-white/10 bg-black/40 p-4 transition-colors hover:bg-white/5 shrink-0 items-start">
                                     <div className="flex flex-col gap-1 pr-4 border-r border-white/10">
@@ -151,7 +151,7 @@ export default function PortalDashboard() {
                 </div>
 
                 {/* RIGHT PANEL: Live Chat (Span 3) */}
-                <div className="md:col-span-3 flex flex-col h-full min-h-0">
+                <div className="md:col-span-3 flex flex-col">
 
                     {/* Live Chat Full Height */}
                     <BaseGlassCard delay={0.4} className="flex flex-col h-full min-h-0">
