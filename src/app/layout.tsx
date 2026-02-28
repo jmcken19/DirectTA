@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from '@/components/providers/ThemeContext';
+import { AuthProvider } from '@/components/providers/AuthProvider';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,12 +30,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased mesh-bg bg-black min-h-screen text-white selection:bg-white/30 transition-colors duration-700`}
       >
         <ThemeProvider>
-          {/* Aesthetic Texture Filter */}
-          <div className="fixed inset-0 z-[-1] pointer-events-none opacity-[0.03] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+          <AuthProvider>
+            {/* Aesthetic Texture Filter */}
+            <div className="fixed inset-0 z-[-1] pointer-events-none opacity-[0.03] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
 
-          <main className="relative z-0 flex min-h-screen flex-col items-center p-6 md:p-12 lg:p-24 overflow-x-hidden">
-            {children}
-          </main>
+            <main className="relative z-0 flex min-h-screen flex-col items-center p-6 md:p-12 lg:p-24 overflow-x-hidden">
+              {children}
+            </main>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
