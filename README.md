@@ -1,5 +1,5 @@
-TA-Direct
-Centralized communication for students and teaching assistants.
+#TA-Direct
+**Centralized communication for students and teaching assistants.**
 
 Mission
 TA-Direct offloads academic support from school inboxes to eliminate email clutter. We provide a dedicated portal that prevents TAs from answering the same questions repeatedly and keeps personal school accounts reserved for official university business.
