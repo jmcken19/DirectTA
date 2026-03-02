@@ -12,7 +12,7 @@ import { supabase } from '@/lib/supabaseClient';
 interface Course {
     id: string;
     name: string;
-    number: string;
+    course_number: string;
 }
 
 interface TA {
@@ -50,7 +50,7 @@ export default function DirectoryPage() {
                         courses (
                             id,
                             name,
-                            number
+                            course_number
                         )
                     `)
                     .eq('user_id', session.user.id);
@@ -204,7 +204,7 @@ export default function DirectoryPage() {
                                             className="group relative flex flex-col justify-between h-40 hover:scale-[1.02] cursor-pointer transition-transform border-white/20 hover:border-white/50 bg-black/40 hover:bg-white/10 overflow-hidden"
                                         >
                                             <div className="relative z-10">
-                                                <div className="text-[10px] font-black tracking-widest text-white/30 mb-1 uppercase">{course.number}</div>
+                                                <div className="text-[10px] font-black tracking-widest text-white/30 mb-1 uppercase">{course.course_number}</div>
                                                 <h2 className="text-xl font-bold text-white leading-tight min-h-[50px]">{course.name}</h2>
                                             </div>
 

@@ -65,7 +65,7 @@ export default function OnboardingPage() {
                 .insert([
                     {
                         name: courseName,
-                        number: courseNumber,
+                        course_number: courseNumber,
                         join_code: newJoinCode,
                     }
                 ])
