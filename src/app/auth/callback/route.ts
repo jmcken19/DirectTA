@@ -6,9 +6,9 @@ import { cookies } from 'next/headers'
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url)
     const code = searchParams.get('code')
-
-    // if "next" is in param, use it as the redirect URL
     const next = searchParams.get('next') ?? '/directory'
+
+    console.log('🔄 Auth Callback triggered', { url: request.url, hasCode: !!code })
 
     if (code) {
         const cookieStore = await cookies()
@@ -25,10 +25,8 @@ export async function GET(request: Request) {
                             cookiesToSet.forEach(({ name, value, options }) =>
                                 cookieStore.set(name, value, options)
                             )
-                        } catch {
-                            // The `setAll` method was called from a Server Component.
-                            // This can be ignored if you have middleware refreshing
-                            // user sessions.
+                        } catch (error) {
+                            console.error('❌ Cookie set error in callback:', error)
                         }
                     },
                 },
@@ -38,10 +36,22 @@ export async function GET(request: Request) {
         const { error } = await supabase.auth.exchangeCodeForSession(code)
 
         if (!error) {
+            console.log('✅ Exchange successful, redirecting to', next)
             return NextResponse.redirect(`${origin}${next}`)
+        } else {
+            console.error('❌ Exchange error:', error.message)
+            return NextResponse.redirect(`${origin}/?error=${encodeURIComponent(error.message)}`)
         }
     }
 
-    // Return the user to an error page with instructions
-    return NextResponse.redirect(`${origin}/?error=auth-callback-failed`)
+    // Checking for error in query params (e.g. access denied)
+    const errorParam = searchParams.get('error')
+    const errorDescription = searchParams.get('error_description')
+    if (errorParam) {
+        console.error('❌ Auth provider error:', { errorParam, errorDescription })
+        return NextResponse.redirect(`${origin}/?error=${encodeURIComponent(errorDescription || errorParam)}`)
+    }
+
+    console.warn('⚠️ No code or error found in auth callback')
+    return NextResponse.redirect(`${origin}/?error=no-code-found`)
 }

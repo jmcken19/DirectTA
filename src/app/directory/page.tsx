@@ -1,54 +1,131 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BaseGlassCard } from '@/components/ui/BaseGlassCard';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Loader2, PlusCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSelection } from '@/hooks/useSelection';
+import { supabase } from '@/lib/supabaseClient';
 
-// Mock DB for Courses
-const COURSES = [
-    { id: 'cs101', name: 'CS101: Intro to Computer Science' },
-    { id: 'itsc3155', name: 'ITSC 3155: Software Engineering' },
-    { id: 'cs202', name: 'CS202: Data Structures' },
-    { id: 'cs412', name: 'CS412: Web Development' }
-];
+interface Course {
+    id: string;
+    name: string;
+    number: string;
+}
 
-// Mock DB for TAs
-const TAS = [
-    { id: '1', name: 'Alex Mercer', courseId: 'cs101' },
-    { id: '2', name: 'Sarah Chen', courseId: 'cs202' },
-    { id: '3', name: 'Marcus Johnson', courseId: 'itsc3155' },
-    { id: '5', name: 'David Kim', courseId: 'itsc3155' }, // 3155 has 2 TAs
-    { id: '4', name: 'Elena Rodriguez', courseId: 'cs412' },
-];
+interface TA {
+    id: string;
+    name: string;
+}
 
 export default function DirectoryPage() {
     const router = useRouter();
     const { setCourseSelect, setTaSelect } = useSelection();
 
+    const [loading, setLoading] = useState(true);
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [tas, setTas] = useState<TA[]>([]);
+
     // Step 1: Course Selection, Step 2: TA Selection
     const [step, setStep] = useState<1 | 2>(1);
-    const [selectedCourse, setSelectedCourse] = useState<{ id: string, name: string } | null>(null);
+    const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 
-    const handleCourseSelect = (courseId: string, courseName: string) => {
-        // Save course selection to cache
-        setCourseSelect(courseId, courseName);
-        setSelectedCourse({ id: courseId, name: courseName });
+    useEffect(() => {
+        const fetchEnrolledCourses = async () => {
+            setLoading(true);
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    router.push('/');
+                    return;
+                }
 
-        // Filter TAs for this course
-        const availableTAs = TAS.filter(ta => ta.courseId === courseId);
+                // Fetch courses via enrollments
+                const { data: enrollments, error } = await supabase
+                    .from('course_enrollments')
+                    .select(`
+                        course_id,
+                        courses (
+                            id,
+                            name,
+                            number
+                        )
+                    `)
+                    .eq('user_id', session.user.id);
 
-        if (availableTAs.length === 1) {
-            // Auto-Route if only 1 TA exists
-            const ta = availableTAs[0];
-            setTaSelect(ta.id);
-            router.push(`/portal/${ta.id}`);
-        } else {
-            // Move to Step 2 (TA Selection Hub)
-            setStep(2);
+                if (error) throw error;
+
+                if (enrollments && enrollments.length > 0) {
+                    const enrolledCourses = enrollments
+                        .map((e: any) => e.courses)
+                        .filter(Boolean);
+                    setCourses(enrolledCourses);
+                } else {
+                    // No enrollments, suggest onboarding
+                    setCourses([]);
+                }
+            } catch (err) {
+                console.error('Error fetching courses:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchEnrolledCourses();
+    }, [router]);
+
+    const handleCourseSelect = async (course: Course) => {
+        setCourseSelect(course.id, course.name);
+        setSelectedCourse(course);
+        setLoading(true);
+
+        try {
+            // Fetch TAs (including professors) for this course from course_enrollments
+            // In this context, a "TA" is anyone with role 'ta' or 'professor'
+            const { data: enrollments, error } = await supabase
+                .from('course_enrollments')
+                .select(`
+                    user_id,
+                    role
+                `)
+                .eq('course_id', course.id)
+                .in('role', ['ta', 'professor']);
+
+            if (error) throw error;
+
+            // In a real app, we'd join with a profiles table to get names.
+            // For now, let's assume we have names or mock them if profiles aren't ready.
+            // Wait, let's try to get user meta or just show IDs if names aren't available.
+            // Actually, let's try to join with 'profiles' (common Supabase pattern).
+
+            const { data: taProfiles, error: profileError } = await supabase
+                .from('profiles')
+                .select('id, full_name')
+                .in('id', enrollments?.map(e => e.user_id) || []);
+
+            // Merge profile data with context from enrollments
+            const combinedTas = enrollments?.map(e => {
+                const profile = taProfiles?.find(p => p.id === e.user_id);
+                return {
+                    id: e.user_id,
+                    name: profile?.full_name || `Staff Member (${e.role})`
+                };
+            }) || [];
+
+            setTas(combinedTas);
+
+            if (combinedTas.length === 1) {
+                setTaSelect(combinedTas[0].id);
+                router.push(`/portal/${combinedTas[0].id}`);
+            } else {
+                setStep(2);
+            }
+        } catch (err) {
+            console.error('Error fetching TAs:', err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -56,6 +133,14 @@ export default function DirectoryPage() {
         setTaSelect(taId);
         router.push(`/portal/${taId}`);
     };
+
+    if (loading && step === 1) {
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <Loader2 className="w-10 h-10 animate-spin text-white/50" />
+            </div>
+        );
+    }
 
     return (
         <div className="w-full max-w-5xl pt-10 min-h-[60vh] relative overflow-hidden">
@@ -83,42 +168,61 @@ export default function DirectoryPage() {
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                         className="w-full"
                     >
-                        <div className="mb-10">
-                            <h1 className="text-4xl font-black tracking-tight text-white mb-2">Select Your Course</h1>
-                            <p className="text-gray-400">Choose a course to find your assigned Teaching Assistant.</p>
+                        <div className="mb-10 flex justify-between items-end">
+                            <div>
+                                <h1 className="text-4xl font-black tracking-tight text-white mb-2">Select Your Course</h1>
+                                <p className="text-gray-400">Choose a course to find your assigned Teaching Assistant.</p>
+                            </div>
+                            <Link href="/onboarding">
+                                <BaseGlassCard className="py-2 px-4 hover:bg-white hover:text-black transition-all border-white/10 flex items-center gap-2 group">
+                                    <PlusCircle className="w-4 h-4" />
+                                    <span className="text-xs font-bold uppercase tracking-widest">Join/Create</span>
+                                </BaseGlassCard>
+                            </Link>
                         </div>
 
-                        {/* Phase 1: Course Grid */}
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            {COURSES.map((course, index) => (
-                                <button
-                                    onClick={() => handleCourseSelect(course.id, course.name)}
-                                    key={course.id}
-                                    className="text-left"
-                                >
-                                    <BaseGlassCard
-                                        delay={0.1 * index}
-                                        className="group relative flex flex-col justify-between h-40 hover:scale-[1.02] cursor-pointer transition-transform border-white/20 hover:border-white/50 bg-black/40 hover:bg-white/10 overflow-hidden"
+                        {courses.length === 0 ? (
+                            <BaseGlassCard className="py-20 text-center border-dashed border-white/20">
+                                <h3 className="text-xl font-bold text-white/70 mb-4">No Courses Found</h3>
+                                <p className="text-gray-500 mb-8">You haven't enrolled in or created any courses yet.</p>
+                                <Link href="/onboarding">
+                                    <button className="px-8 py-3 bg-white text-black font-black rounded-xl hover:bg-gray-200 transition-colors">
+                                        Get Started
+                                    </button>
+                                </Link>
+                            </BaseGlassCard>
+                        ) : (
+                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                {courses.map((course, index) => (
+                                    <button
+                                        onClick={() => handleCourseSelect(course)}
+                                        key={course.id}
+                                        className="text-left"
                                     >
-                                        <div className="relative z-10">
-                                            <h2 className="text-xl font-bold text-white leading-tight min-h-[50px]">{course.name}</h2>
-                                        </div>
+                                        <BaseGlassCard
+                                            delay={0.1 * index}
+                                            className="group relative flex flex-col justify-between h-40 hover:scale-[1.02] cursor-pointer transition-transform border-white/20 hover:border-white/50 bg-black/40 hover:bg-white/10 overflow-hidden"
+                                        >
+                                            <div className="relative z-10">
+                                                <div className="text-[10px] font-black tracking-widest text-white/30 mb-1 uppercase">{course.number}</div>
+                                                <h2 className="text-xl font-bold text-white leading-tight min-h-[50px]">{course.name}</h2>
+                                            </div>
 
-                                        <div className="relative z-10 flex items-center justify-between mt-4 border-t border-white/10 pt-4">
-                                            <span className="text-sm font-medium text-white/70 group-hover:text-white transition-colors">
-                                                View TAs
-                                            </span>
-                                            <ArrowRight className="h-4 w-4 text-white/50 group-hover:text-white transition-colors transform group-hover:translate-x-1" />
-                                        </div>
+                                            <div className="relative z-10 flex items-center justify-between mt-4 border-t border-white/10 pt-4">
+                                                <span className="text-sm font-medium text-white/70 group-hover:text-white transition-colors">
+                                                    View Staff
+                                                </span>
+                                                <ArrowRight className="h-4 w-4 text-white/50 group-hover:text-white transition-colors transform group-hover:translate-x-1" />
+                                            </div>
 
-                                        {/* Subtle Azura C Charlotte Logo Maker */}
-                                        <div className="absolute top-4 right-4 text-[10px] font-black tracking-tighter text-white/10 select-none">
-                                            C.
-                                        </div>
-                                    </BaseGlassCard>
-                                </button>
-                            ))}
-                        </div>
+                                            <div className="absolute top-4 right-4 text-[10px] font-black tracking-tighter text-white/10 select-none">
+                                                C.
+                                            </div>
+                                        </BaseGlassCard>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </motion.div>
                 )}
 
@@ -133,40 +237,45 @@ export default function DirectoryPage() {
                     >
                         <div className="mb-10">
                             <h1 className="text-4xl font-black tracking-tight text-white mb-2">{selectedCourse.name}</h1>
-                            <p className="text-gray-400">Select your Teaching Assistant to access their portal.</p>
+                            <p className="text-gray-400">Select your Teaching Assistant or Professor to access their portal.</p>
                         </div>
 
-                        {/* Phase 2: TA Selection Hub */}
-                        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                            {TAS.filter(ta => ta.courseId === selectedCourse.id).map((ta, index) => (
-                                <button
-                                    onClick={() => handleTaSelect(ta.id)}
-                                    key={ta.id}
-                                    className="text-left focus:outline-none"
-                                >
-                                    <BaseGlassCard
-                                        delay={0.1 * index}
-                                        className="group flex flex-col justify-between h-48 hover:scale-[1.02] cursor-pointer transition-transform border-white/20 hover:border-white/50 bg-black/40 hover:bg-white/10"
+                        {loading ? (
+                            <div className="flex h-40 items-center justify-center">
+                                <Loader2 className="w-8 h-8 animate-spin text-white/50" />
+                            </div>
+                        ) : (
+                            <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                                {tas.map((ta, index) => (
+                                    <button
+                                        onClick={() => handleTaSelect(ta.id)}
+                                        key={ta.id}
+                                        className="text-left focus:outline-none"
                                     >
-                                        <div className="flex items-center gap-4">
-                                            <div className="h-14 w-14 rounded-full bg-[#222] border border-white/10 flex items-center justify-center shrink-0">
-                                                <span className="text-lg font-bold text-white/50">{ta.name.charAt(0)}</span>
+                                        <BaseGlassCard
+                                            delay={0.1 * index}
+                                            className="group flex flex-col justify-between h-48 hover:scale-[1.02] cursor-pointer transition-transform border-white/20 hover:border-white/50 bg-black/40 hover:bg-white/10"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-14 w-14 rounded-full bg-[#222] border border-white/10 flex items-center justify-center shrink-0">
+                                                    <span className="text-lg font-bold text-white/50">{ta.name.charAt(0)}</span>
+                                                </div>
+                                                <div>
+                                                    <h2 className="text-lg font-bold text-white">{ta.name}</h2>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h2 className="text-lg font-bold text-white">TA: {ta.name}</h2>
-                                            </div>
-                                        </div>
 
-                                        <div className="flex items-center justify-between mt-auto border-t border-white/10 pt-4">
-                                            <span className="text-sm font-bold text-white/90 group-hover:text-white transition-colors">
-                                                Click to access TA Site
-                                            </span>
-                                            <ArrowRight className="h-4 w-4 text-white/50 group-hover:text-white transition-colors transform group-hover:translate-x-1" />
-                                        </div>
-                                    </BaseGlassCard>
-                                </button>
-                            ))}
-                        </div>
+                                            <div className="flex items-center justify-between mt-auto border-t border-white/10 pt-4">
+                                                <span className="text-sm font-bold text-white/90 group-hover:text-white transition-colors">
+                                                    Click to access Site
+                                                </span>
+                                                <ArrowRight className="h-4 w-4 text-white/50 group-hover:text-white transition-colors transform group-hover:translate-x-1" />
+                                            </div>
+                                        </BaseGlassCard>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>

@@ -11,7 +11,7 @@ export default function Home() {
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user?.email?.endsWith('@charlotte.edu')) {
+      if (session?.user) {
         router.push('/directory'); // Phase A Selection Hub
       }
     };
@@ -24,6 +24,10 @@ export default function Home() {
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
       },
     });
   };
@@ -43,7 +47,7 @@ export default function Home() {
           onClick={handleLogin}
           className="group relative flex w-full items-center justify-center overflow-hidden rounded-xl border border-white/20 bg-white/5 px-6 py-4 transition-all duration-300 hover:bg-white hover:text-black focus:outline-none focus:ring-2 focus:ring-white/50"
         >
-          <span className="font-semibold tracking-wide">Login with your school account</span>
+          <span className="font-semibold tracking-wide">Sign in with Google</span>
         </button>
       </BaseGlassCard>
 

@@ -42,7 +42,7 @@ export function useSelection() {
             }
         }
         setIsLoaded(true);
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const setCourseSelect = (courseId: string, courseName: string) => {
         const newState = {
